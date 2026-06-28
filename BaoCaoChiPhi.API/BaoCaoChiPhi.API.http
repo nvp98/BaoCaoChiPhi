@@ -1,0 +1,6 @@
+@BaoCaoChiPhi.API_HostAddress = http://localhost:5230
+
+GET {{BaoCaoChiPhi.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
