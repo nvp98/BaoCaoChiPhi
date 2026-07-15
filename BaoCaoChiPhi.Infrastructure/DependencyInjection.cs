@@ -20,14 +20,12 @@ public static class DependencyInjection
         services.AddDbContext<ProductDataDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DbConnection")));
 
-        services.Configure<JwtSettings>(opts => configuration.GetSection("JwtSettings").Bind(opts));
         services.Configure<DefaultUserSettings>(opts => configuration.GetSection("DefaultUser").Bind(opts));
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IBaoCaoChiPhiRepository, BaoCaoChiPhiRepository>();
         services.AddScoped<IBienBanGiaoNhanRepository, BienBanGiaoNhanRepository>();
         services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<TokenService>();
 
         return services;
     }

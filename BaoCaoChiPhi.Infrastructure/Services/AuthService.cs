@@ -4,16 +4,11 @@ using Microsoft.Extensions.Options;
 
 namespace BaoCaoChiPhi.Infrastructure.Services;
 
-public class AuthService(TokenService tokenService, IOptions<DefaultUserSettings> userOptions) : IAuthService
+public class AuthService(IOptions<DefaultUserSettings> userOptions) : IAuthService
 {
     private readonly DefaultUserSettings _user = userOptions.Value;
 
-    public string? Login(string username, string password)
-    {
-        if (!string.Equals(username, _user.Username, StringComparison.OrdinalIgnoreCase)
-            || password != _user.Password)
-            return null;
-
-        return tokenService.GenerateToken(username);
-    }
+    public bool Validate(string username, string password)
+        => string.Equals(username, _user.Username, StringComparison.OrdinalIgnoreCase)
+           && password == _user.Password;
 }
