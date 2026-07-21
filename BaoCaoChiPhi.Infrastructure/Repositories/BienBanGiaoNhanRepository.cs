@@ -16,10 +16,10 @@ public class BienBanGiaoNhanRepository(ProductDataDbContext context) : IBienBanG
 
         // --- Filters ---
         if (request.FromDate.HasValue)
-            query = query.Where(x => x.NgayTao.Date >= request.FromDate.Value.Date);
+            query = query.Where(x => x.ThoiGianXuLyBG.Date >= request.FromDate.Value.Date);
 
         if (request.ToDate.HasValue)
-            query = query.Where(x => x.NgayTao.Date <= request.ToDate.Value.Date);
+            query = query.Where(x => x.ThoiGianXuLyBG.Date <= request.ToDate.Value.Date);
 
         if (request.Shift.HasValue)
         {
@@ -45,7 +45,7 @@ public class BienBanGiaoNhanRepository(ProductDataDbContext context) : IBienBanG
         // --- GroupBy ---
         var grouped = query.GroupBy(x => new
         {
-            ProductionDate = x.NgayTao.Date,
+            ProductionDate = x.ThoiGianXuLyBG.Date,
             x.Ca,
             x.ID_VatTu,
             x.ID_PhongBan_BG,

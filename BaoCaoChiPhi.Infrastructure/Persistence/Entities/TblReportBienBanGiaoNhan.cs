@@ -23,6 +23,7 @@ public class TblReportBienBanGiaoNhan
 
     // Bên giao
     public long? ID_PhongBan_BG { get; set; }
+    public DateTime ThoiGianXuLyBG { get; set; }
     public string? TenPhongBan_BG { get; set; }
     public string? MaPhongBan_BG { get; set; }
     public long? ID_Xuong_BG { get; set; }
@@ -30,6 +31,7 @@ public class TblReportBienBanGiaoNhan
 
     // Bên nhận
     public long? ID_PhongBan_BN { get; set; }
+    public DateTime? ThoiGianXuLyBN { get; set; }
     public string? TenPhongBan_BN { get; set; }
     public string? MaPhongBan_BN { get; set; }
     public long? ID_Xuong_BN { get; set; }
