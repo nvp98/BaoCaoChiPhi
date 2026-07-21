@@ -20,11 +20,15 @@ public static class DependencyInjection
         services.AddDbContext<ProductDataDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DbConnection")));
 
+        services.AddDbContext<ProductFormDbContext>(options =>
+            options.UseSqlServer(configuration.GetConnectionString("DbConnection_Form")));
+
         services.Configure<DefaultUserSettings>(opts => configuration.GetSection("DefaultUser").Bind(opts));
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IBaoCaoChiPhiRepository, BaoCaoChiPhiRepository>();
         services.AddScoped<IBienBanGiaoNhanRepository, BienBanGiaoNhanRepository>();
+        services.AddScoped<IProductionDataRepository, ProductionDataRepository>();
         services.AddScoped<IAuthService, AuthService>();
 
         return services;

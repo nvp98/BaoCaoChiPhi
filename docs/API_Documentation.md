@@ -12,6 +12,8 @@
    - [POST /Auth/login](#11-post-authlogin)
 2. [BienBanGiaoNhan — Biên bản giao nhận vật liệu](#2-bienbangiaoNhan--biên-bản-giao-nhận-vật-liệu)
    - [GET /BienBanGiaoNhan](#21-get-bienbangiaoNhan)
+3. [ProductionData — Dữ liệu sản xuất chi phí](#3-productiondata--dữ-liệu-sản-xuất-chi-phí)
+   - [GET /ProductionData](#31-get-productiondata)
 
 ---
 
@@ -198,6 +200,124 @@ curl -X GET "https://<host>/api/BienBanGiaoNhan?MaterialCode=MAT-001&WorkshopFro
 
 ---
 
+---
+
+## 3. ProductionData — Dữ liệu sản xuất chi phí
+
+### 3.1 GET /ProductionData
+
+Lấy danh sách dữ liệu sản xuất từ bảng `ChiPhi_ProductionData`. Hỗ trợ lọc theo tất cả các trường và **phân trang** theo `PageNumber` / `PageSize`.
+
+**Yêu cầu xác thực:** Bearer Token (JWT)
+
+#### Request
+
+| Thuộc tính | Vị trí | Kiểu dữ liệu | Bắt buộc | Mô tả |
+|---|---|---|---|---|
+| `Authorization` | Header | `string` | Có | `Bearer <token>` |
+
+**Query Parameters:**
+
+| Tham số | Kiểu | Bắt buộc | Mặc định | Mô tả |
+|---|---|---|---|---|
+| `CongDoan` | string | Không | — | Lọc theo công đoạn (khớp chính xác) |
+| `MaChiPhi` | string | Không | — | Lọc theo mã chi phí (khớp chính xác) |
+| `FromNgay` | date | Không | — | Lọc từ ngày sản xuất. Định dạng: `yyyy-MM-dd` |
+| `ToNgay` | date | Không | — | Lọc đến ngày sản xuất. Định dạng: `yyyy-MM-dd` |
+| `Ca` | integer (0–255) | Không | — | Lọc theo ca sản xuất (khớp chính xác) |
+| `Kip` | string | Không | — | Lọc theo kíp (khớp chính xác) |
+| `MaVatTu` | string | Không | — | Lọc theo mã vật tư (khớp chính xác) |
+| `TenVatTu` | string | Không | — | Tìm kiếm theo tên vật tư (chứa chuỗi, không phân biệt hoa thường) |
+| `DonViTinh` | string | Không | — | Lọc theo đơn vị tính (khớp chính xác) |
+| `FromCreatedDate` | datetime | Không | — | Lọc từ ngày tạo bản ghi. Định dạng ISO 8601 |
+| `ToCreatedDate` | datetime | Không | — | Lọc đến ngày tạo bản ghi. Định dạng ISO 8601 |
+| `PageNumber` | integer | Không | `1` | Số trang (bắt đầu từ 1) |
+| `PageSize` | integer | Không | `20` | Số bản ghi mỗi trang |
+
+#### Response
+
+**200 OK**
+
+```json
+{
+  "code": 200,
+  "message": "Success",
+  "data": [
+    {
+      "id": 1001,
+      "congDoan": "Cán Thép",
+      "maChiPhi": "CP001",
+      "ngay": "2026-07-01",
+      "ca": 1,
+      "kip": "K1",
+      "maVatTu": "VT001",
+      "tenVatTu": "Thép cuộn CT3",
+      "khoiLuong": 1250.500,
+      "donViTinh": "KG",
+      "createdDate": "2026-07-01T08:30:00"
+    }
+  ],
+  "totalRecords": 320,
+  "pageNumber": 1,
+  "pageSize": 20
+}
+```
+
+**Cấu trúc Response:**
+
+| Trường | Kiểu | Mô tả |
+|---|---|---|
+| `code` | integer | Mã trạng thái HTTP (`200` khi thành công) |
+| `message` | string | Thông báo kết quả (`"Success"` khi thành công) |
+| `data` | array | Danh sách bản ghi dữ liệu sản xuất (xem bên dưới) |
+| `totalRecords` | integer | Tổng số bản ghi thỏa điều kiện lọc (dùng để tính tổng trang) |
+| `pageNumber` | integer | Trang hiện tại |
+| `pageSize` | integer | Số bản ghi mỗi trang |
+
+**Cấu trúc mỗi phần tử trong `data`:**
+
+| Trường | Kiểu | Mô tả |
+|---|---|---|
+| `id` | long | Khóa chính |
+| `congDoan` | string | Tên công đoạn sản xuất |
+| `maChiPhi` | string | Mã chi phí |
+| `ngay` | date | Ngày sản xuất (`yyyy-MM-dd`) |
+| `ca` | integer | Ca sản xuất |
+| `kip` | string | Kíp sản xuất |
+| `maVatTu` | string | Mã vật tư |
+| `tenVatTu` | string | Tên vật tư |
+| `khoiLuong` | decimal | Khối lượng (3 chữ số thập phân) |
+| `donViTinh` | string | Đơn vị tính |
+| `createdDate` | datetime | Thời điểm tạo bản ghi |
+
+**401 Unauthorized** — Token không hợp lệ hoặc hết hạn.
+
+#### Sắp xếp mặc định
+
+Kết quả trả về được sắp xếp theo: **ngày giảm dần** → **ca tăng dần** → **công đoạn tăng dần**.
+
+#### Ví dụ cURL
+
+```bash
+# Lấy dữ liệu theo khoảng ngày và ca
+curl -X GET "https://<host>/api/ProductionData?FromNgay=2026-07-01&ToNgay=2026-07-31&Ca=1&PageNumber=1&PageSize=20" \
+  -H "Authorization: Bearer <token>"
+```
+
+```bash
+# Tìm theo mã vật tư và công đoạn
+curl -X GET "https://<host>/api/ProductionData?MaVatTu=VT001&CongDoan=Cán+Thép&PageSize=50" \
+  -H "Authorization: Bearer <token>"
+```
+
+```bash
+# Tìm theo tên vật tư (contains)
+curl -X GET "https://<host>/api/ProductionData?TenVatTu=Thép&PageNumber=1&PageSize=20" \
+  -H "Authorization: Bearer <token>"
+```
+
+---
+
 ## Luồng sử dụng điển hình
 
 ```
@@ -207,6 +327,10 @@ curl -X GET "https://<host>/api/BienBanGiaoNhan?MaterialCode=MAT-001&WorkshopFro
 2. GET /api/BienBanGiaoNhan?FromDate=...&ToDate=...
       Header: Authorization: Bearer <token>
       ↓ nhận danh sách biên bản giao nhận có phân trang
+
+3. GET /api/ProductionData?FromNgay=...&ToNgay=...&Ca=1
+      Header: Authorization: Bearer <token>
+      ↓ nhận danh sách dữ liệu sản xuất chi phí có phân trang
 ```
 
 ---
