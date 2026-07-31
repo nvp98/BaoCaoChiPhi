@@ -4,17 +4,15 @@ using MediatR;
 namespace BaoCaoChiPhi.Application.Features.ProductionData.Queries;
 
 public record GetProductionDataQuery(
-    string? CongDoan,
-    string? MaChiPhi,
+    string? WorkCenter,
+    int? CostType,
     DateOnly? FromDate,
     DateOnly? ToDate,
-    byte? Ca,
-    string? Kip,
-    string? MaVatTu,
-    string? TenVatTu,
-    string? DonViTinh,
-    // DateTime? FromCreatedDate,
-    // DateTime? ToCreatedDate,
+    byte? Shift,
+    string? ShiftName,
+    string? MaterialCode,
+    string? MaterialName,
+    string? Unit,
     int PageNumber = 1,
     int PageSize = 20
 ) : IRequest<PagedApiResponse<ProductionDataDto>>;

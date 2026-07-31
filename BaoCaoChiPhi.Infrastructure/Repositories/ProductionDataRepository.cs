@@ -14,11 +14,11 @@ public class ProductionDataRepository(ProductFormDbContext context) : IProductio
     {
         var query = context.ChiPhiProductionData.AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(request.CongDoan))
-            query = query.Where(x => x.CongDoan == request.CongDoan);
+        if (!string.IsNullOrWhiteSpace(request.WorkCenter))
+            query = query.Where(x => x.CongDoan == request.WorkCenter);
 
-        if (!string.IsNullOrWhiteSpace(request.MaChiPhi))
-            query = query.Where(x => x.MaChiPhi == request.MaChiPhi);
+        if (request.CostType.HasValue)
+            query = query.Where(x => x.MaChiPhi == request.CostType.Value.ToString());
 
         if (request.FromDate.HasValue)
             query = query.Where(x => x.Ngay >= request.FromDate.Value);
@@ -26,20 +26,20 @@ public class ProductionDataRepository(ProductFormDbContext context) : IProductio
         if (request.ToDate.HasValue)
             query = query.Where(x => x.Ngay <= request.ToDate.Value);
 
-        if (request.Ca.HasValue)
-            query = query.Where(x => x.Ca == request.Ca.Value);
+        if (request.Shift.HasValue)
+            query = query.Where(x => x.Ca == request.Shift.Value);
 
-        if (!string.IsNullOrWhiteSpace(request.Kip))
-            query = query.Where(x => x.Kip == request.Kip);
+        if (!string.IsNullOrWhiteSpace(request.ShiftName))
+            query = query.Where(x => x.Kip == request.ShiftName);
 
-        if (!string.IsNullOrWhiteSpace(request.MaVatTu))
-            query = query.Where(x => x.MaVatTu == request.MaVatTu);
+        if (!string.IsNullOrWhiteSpace(request.MaterialCode))
+            query = query.Where(x => x.MaVatTu == request.MaterialCode);
 
-        if (!string.IsNullOrWhiteSpace(request.TenVatTu))
-            query = query.Where(x => x.TenVatTu != null && x.TenVatTu.Contains(request.TenVatTu));
+        if (!string.IsNullOrWhiteSpace(request.MaterialName))
+            query = query.Where(x => x.TenVatTu != null && x.TenVatTu.Contains(request.MaterialName));
 
-        if (!string.IsNullOrWhiteSpace(request.DonViTinh))
-            query = query.Where(x => x.DonViTinh == request.DonViTinh);
+        if (!string.IsNullOrWhiteSpace(request.Unit))
+            query = query.Where(x => x.DonViTinh == request.Unit);
 
         // if (request.FromCreatedDate.HasValue)
         //     query = query.Where(x => x.CreatedDate >= request.FromCreatedDate.Value);
@@ -49,27 +49,38 @@ public class ProductionDataRepository(ProductFormDbContext context) : IProductio
 
         var total = await query.CountAsync(cancellationToken);
 
-        var items = await query
+        var rawItems = await query
             .OrderByDescending(x => x.Ngay)
             .ThenBy(x => x.Ca)
             .ThenBy(x => x.CongDoan)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
-            .Select(x => new ProductionDataDto
+            .Select(x => new
             {
-                Id = x.Id,
-                CongDoan = x.CongDoan ?? string.Empty,
-                MaChiPhi = x.MaChiPhi ?? string.Empty,
-                Ngay = x.Ngay,
-                Ca = x.Ca,
-                Kip = x.Kip ?? string.Empty,
-                MaVatTu = x.MaVatTu ?? string.Empty,
-                TenVatTu = x.TenVatTu ?? string.Empty,
-                KhoiLuong = x.KhoiLuong,
-                DonViTinh = x.DonViTinh ?? string.Empty,
-                CreatedDate = x.CreatedDate
+                x.Ngay,
+                x.Ca,
+                x.Kip,
+                x.MaChiPhi,
+                x.CongDoan,
+                x.TenVatTu,
+                x.MaVatTu,
+                x.KhoiLuong,
+                x.DonViTinh
             })
             .ToListAsync(cancellationToken);
+
+        var items = rawItems.Select(x => new ProductionDataDto
+        {
+            ProductionDate = x.Ngay,
+            Shift = x.Ca?.ToString() ?? string.Empty,
+            ShiftName = x.Kip ?? string.Empty,
+            CostType = int.TryParse(x.MaChiPhi, out var costType) ? costType : null,
+            WorkCenter = x.CongDoan ?? string.Empty,
+            MaterialName = x.TenVatTu ?? string.Empty,
+            MaterialCode = x.MaVatTu ?? string.Empty,
+            Weight = x.KhoiLuong,
+            Unit = x.DonViTinh ?? string.Empty
+        }).ToList();
 
         return (items, total);
     }
